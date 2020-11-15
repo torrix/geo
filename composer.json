@@ -3,7 +3,7 @@
     "type": "project",
     "require": {
         "adodb/adodb-php": "^5.20",
-        "vlucas/phpdotenv": "^5.2",
-        "robmorgan/phinx": "^0.12.4"
+        "robmorgan/phinx": "^0.12.4",
+        "php-coord/php-coord": "^3.1"
     }
 }

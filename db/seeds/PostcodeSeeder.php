@@ -10,12 +10,11 @@ class PostcodeSeeder extends AbstractSeed
     public function run()
     {
         echo 'Downloading CodePoint Open data' . PHP_EOL;
-//        $postcodes = file_get_contents(self::FILE);
+        $postcodes = file_get_contents(self::FILE);
         echo 'Saving CodePoint Open data' . PHP_EOL;
-//        file_put_contents('data/postcodes.zip', $postcodes);
+        file_put_contents('data/postcodes.zip', $postcodes);
         echo 'Unpacking CodePoint Open data' . PHP_EOL;
-//        shell_exec('cd data && unzip postcodes.zip');
-
+        shell_exec('cd data && unzip postcodes.zip');
 
         $postcodeTable = $this->table('postcodes');
         $postcodeTable->truncate();
@@ -27,15 +26,8 @@ class PostcodeSeeder extends AbstractSeed
                 while (($data = fgetcsv($handle)) !== false) {
                     $postcodes[] = [
                         'postcode'   => $data[0],
-                        'quality'    => $data[1],
-                        'latitude'   => $data[2],
-                        'longitude'  => $data[3],
-                        'country'    => $data[4],
-                        'nhs_region' => $data[5],
-                        'nhs_h_a'    => $data[6],
-                        'county'     => $data[7],
-                        'district'   => $data[8],
-                        'ward'       => $data[9],
+                        'easting'    => $data[2],
+                        'northing'   => $data[3],
                     ];
                 }
                 fclose($handle);

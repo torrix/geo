@@ -1,23 +1,29 @@
 <?php
 require __DIR__ . '/../vendor/autoload.php';
 
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
-$dotenv->load();
+$DB_CONNECTION = $_SERVER['DB_CONNECTION'];
+$DB_USERNAME   = $_SERVER['DB_USERNAME'];
+$DB_PASSWORD   = $_SERVER['DB_PASSWORD'];
+$DB_HOST       = $_SERVER['DB_HOST'];
+$DB_DATABASE   = $_SERVER['DB_DATABASE'];
+
+$dsn = "{$DB_CONNECTION}://{$DB_USERNAME}:{$DB_PASSWORD}@{$DB_HOST}/{$DB_DATABASE}";
 
 $ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
+$db = NewADOConnection($dsn) or die('Database Connection Failed');
 
-$db = NewADOConnection("{$_ENV['DB_CONNECTION']}://{$_ENV['DB_USERNAME']}:{$_ENV['DB_PASSWORD']}@{$_ENV['DB_HOST']}/{$_ENV['DB_DATABASE']}");
-if (! $db) {
-    die('Database Connection Failed');
-}
+$_GET['postcode'] = str_replace(' ', '', trim($_GET['postcode']));
 
-if (isset($_GET['postcode']) && $_GET['postcode'] != '') {
-    $postcode = $db->getRow("SELECT * FROM postcodes WHERE postcode LIKE '{$_GET['postcode']}%'");
+if (isset($_GET['postcode']) && $_GET['postcode'] != '' && ctype_alnum($_GET['postcode'])) {
+    $postcode = $db->getRow("SELECT * FROM postcodes WHERE REPLACE(postcode,' ','') LIKE '{$_GET['postcode']}%'");
 }
 
 if (isset($postcode) && $postcode) {
-    $lat = $postcode['latitude'];
-    $lon = $postcode['longitude'];
+    $OSRef     = new PHPCoord\OSRef((int) $postcode['easting'], (int) $postcode['northing']);
+    $LatLng    = $OSRef->toLatLng();
+    $GPSLatLng = $LatLng->toWGS84();
+    $lat       = $GPSLatLng->getLat();
+    $lon       = $GPSLatLng->getLng();
 } else {
     $lat = 54.0643908566752;
     $lon = -2.85714411442939;
@@ -30,9 +36,6 @@ if (isset($postcode) && $postcode) {
     <script src="http://www.openlayers.org/api/OpenLayers.js"></script>
     <script src="http://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>
     <script type="text/javascript">
-        // Start position for the map (hardcoded here for simplicity,
-        // but maybe you want to get from URL params)
-
         var lat =<?php echo $lat; ?>;
         var lon =<?php echo $lon; ?>;
 
@@ -72,8 +75,8 @@ if (isset($postcode) && $postcode) {
         }
     </script>
 </head>
-<body onload="init();">
-<form action=".." method="get">
+<body onload="init()">
+<form method="get">
     <p>
         Postcode: <input type="text" maxlength="8" value="<?= isset($_GET['postcode']) ? $_GET['postcode'] : '' ?>"
                          name="postcode"> <input
@@ -81,6 +84,11 @@ if (isset($postcode) && $postcode) {
     </p>
 </form>
 <div style="width:100%; height:800px" id="map"></div>
-Data CC-By-SA by OpenStreetMap
+<address>
+    Data CC-By-SA by OpenStreetMap<br>
+    Contains OS data © Crown copyright and database right 2020<br>
+    Contains Royal Mail data © Royal Mail copyright and Database right 2020<br>
+    Contains National Statistics data © Crown copyright and database right 2020
+</address>
 </body>
 </html>

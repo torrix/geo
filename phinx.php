@@ -9,11 +9,11 @@ return [
         'default_environment'     => 'production',
         'production'              => [
             'adapter' => 'mysql',
-            'host'    => 'mysql',
-            'name'    => 'geo',
-            'user'    => 'geo',
-            'pass'    => 'geo',
-            'port'    => '3306',
+            'host'    => getenv('DB_HOST'),
+            'name'    => getenv('DB_DATABASE'),
+            'user'    => getenv('DB_USERNAME'),
+            'pass'    => getenv('DB_PASSWORD'),
+            'port'    => getenv('DB_PORT'),
             'charset' => 'utf8',
         ]
     ],

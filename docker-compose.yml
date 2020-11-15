@@ -8,10 +8,10 @@ services:
       volumes:
         - .:/application
       environment:
-        - MYSQL_ROOT_PASSWORD=geo
-        - MYSQL_DATABASE=geo
-        - MYSQL_USER=geo
-        - MYSQL_PASSWORD=geo
+        - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+        - MYSQL_DATABASE=${DB_DATABASE}
+        - MYSQL_USER=${DB_USERNAME}
+        - MYSQL_PASSWORD=${DB_PASSWORD}
       ports:
         - "1071:3306"
 
@@ -23,20 +23,23 @@ services:
       image: nginx:alpine
       container_name: geo-webserver
       working_dir: /application
+      env_file:
+        - .env
       volumes:
           - .:/application
           - ./phpdocker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
       ports:
-       - "8069:80"
+       - "80:80"
 
     php-fpm:
       build: phpdocker/php-fpm
       container_name: geo-php-fpm
       working_dir: /application
+      env_file:
+        - .env
       volumes:
         - .:/application
         - ./phpdocker/php-fpm/php-ini-overrides.ini:/etc/php/7.4/fpm/conf.d/99-overrides.ini
-
 
     phpmyadmin:
       depends_on:
@@ -46,5 +49,7 @@ services:
       ports:
         - '8080:80'
       environment:
-        PMA_HOST: mysql
-        MYSQL_ROOT_PASSWORD: geo
+        - PMA_HOST=mysql
+        - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+        - PMA_USER=${DB_USERNAME}
+        - PMA_PASSWORD=${DB_PASSWORD}
