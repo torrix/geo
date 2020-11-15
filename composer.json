@@ -1,0 +1,9 @@
+{
+    "name": "torrix/geo",
+    "type": "project",
+    "require": {
+        "adodb/adodb-php": "^5.20",
+        "vlucas/phpdotenv": "^5.2",
+        "robmorgan/phinx": "^0.12.4"
+    }
+}
